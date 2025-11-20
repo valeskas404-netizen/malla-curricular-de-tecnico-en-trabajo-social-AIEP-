@@ -49,7 +49,8 @@ let messageTimeout; // Para controlar la desaparición del mensaje de bloqueo
  */
 function loadState() {
     try {
-        const savedState = localStorage.getItem('curriculumApprovedCourses');
+        // Usando un ID único basado en el dominio para evitar conflictos si hay otras mallas
+        const savedState = localStorage.getItem('curriculumApprovedCourses'); 
         if (savedState) {
             approvedCourses = JSON.parse(savedState);
         }
@@ -139,18 +140,17 @@ function showMessage(type, message) {
     const msgBox = document.getElementById('message-box');
     const msgContent = document.getElementById('message-content');
     
-    if (type === 'blocked') {
-        // En el nuevo caso, el mensaje de bloqueo puede ser por un requisito faltante O por un dependiente aprobado.
-        document.querySelector('#message-box p').textContent = 'Acción Bloqueada';
-        msgContent.innerHTML = message;
-    }
+    // Aseguramos que el encabezado del mensaje sea consistente
+    document.querySelector('#message-box p').textContent = 'Acción Bloqueada';
+    msgContent.innerHTML = message;
+    
 
     msgBox.classList.add('show');
 
     clearTimeout(messageTimeout);
     messageTimeout = setTimeout(() => {
         msgBox.classList.remove('show');
-    }, 6000); // Damos más tiempo para leer mensajes de bloqueo
+    }, 6000); // Mantenemos el tiempo para leer mensajes de bloqueo
 }
 
 // --- Renderizado Principal ---
@@ -170,10 +170,8 @@ function renderCurriculum() {
         const semesterCourses = coursesBySemester[semester];
         
         const semesterColumn = document.createElement('div');
-        // Usamos la clase CSS 'semester-column' para el diseño de columna con separador
         semesterColumn.className = 'semester-column'; 
         
-        // Título del Semestre: Usamos 'semester-title' para el estilo del recuadro del título
         const title = document.createElement('h2');
         title.className = 'semester-title';
         title.textContent = `Semestre ${semester}`;
@@ -188,7 +186,6 @@ function renderCurriculum() {
             card.id = `course-${course.code}`;
             card.setAttribute('data-course-code', course.code);
 
-            // Clases base para la tarjeta: p-2 (padding muy pequeño) y texto pequeño
             let cardClasses = 'course-card text-sm'; 
             
             if (isPracticaLaboral) {
@@ -267,13 +264,16 @@ function handleCourseClick(courseCode) {
 
         if (dependentCourses.length > 0) {
             // BLOQUEO: No se puede desaprobar porque rompe la cadena de requisitos
+            
+            // Generamos la lista de dependientes para el mensaje
             let reqNames = dependentCourses.map(code => 
-                `<li>${code} - ${COURSE_NAME_MAP[code]}</li>`
+                `<li><strong>${code}</strong> - ${COURSE_NAME_MAP[code]}</li>`
             ).join('');
             
-            const message = `No puedes desaprobar <strong>${course.name}</strong> porque los siguientes ramos ya están aprobados y dependen de él:
-                <ul class="list-disc list-inside mt-1">${reqNames}</ul>
-                <p class="mt-2 font-bold">Desaprueba primero los ramos dependientes (haciendo clic en ellos).</p>
+            // Mensaje clarificado
+            const message = `No puedes desaprobar <strong>${course.name}</strong> porque es un requisito obligatorio para los siguientes ramos que ya marcaste como APROBADOS:
+                <ul class="list-disc list-inside mt-2 ml-4">${reqNames}</ul>
+                <p class="mt-3 font-bold">Para desaprobar este ramo, debes primero desaprobar (haciendo clic) todos sus dependientes listados arriba.</p>
             `;
             
             showMessage('blocked', message);
@@ -301,11 +301,11 @@ function handleCourseClick(courseCode) {
         const missingReqs = JSON.parse(missingReqsData);
         
         let reqNames = missingReqs.map(code => 
-            `<li>${code} - ${COURSE_NAME_MAP[code]}</li>`
+            `<li><strong>${code}</strong> - ${COURSE_NAME_MAP[code]}</li>`
         ).join('');
         
         const message = `Necesitas aprobar los siguientes ramos antes de cursar <strong>${course.name}</strong>:
-            <ul class="list-disc list-inside mt-1">${reqNames}</ul>
+            <ul class="list-disc list-inside mt-2 ml-4">${reqNames}</ul>
         `;
         
         showMessage('blocked', message);
