@@ -82,7 +82,8 @@ body {
     color: var(--color-approved-text);
     text-decoration: none; 
     opacity: 0.9;
-    pointer-events: none;
+    /* CORRECCIÓN CRÍTICA: Aseguramos que el puntero esté activo para la deselección */
+    pointer-events: auto; 
     transform: none;
 }
 
