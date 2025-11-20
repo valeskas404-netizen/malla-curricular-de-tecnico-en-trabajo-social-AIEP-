@@ -49,7 +49,6 @@ let messageTimeout; // Para controlar la desaparición del mensaje de bloqueo
  */
 function loadState() {
     try {
-        // Usando un ID único basado en el dominio para evitar conflictos si hay otras mallas
         const savedState = localStorage.getItem('curriculumApprovedCourses'); 
         if (savedState) {
             approvedCourses = JSON.parse(savedState);
@@ -69,6 +68,38 @@ function saveState() {
         console.error("Error al guardar el estado en localStorage:", error);
     }
 }
+
+/**
+ * Borra todos los datos guardados en localStorage y reinicia la aplicación.
+ * Útil para debugging o si la cadena de dependencias se vuelve inmanejable.
+ */
+function clearAllData() {
+    localStorage.removeItem('curriculumApprovedCourses');
+    approvedCourses = {};
+    renderCurriculum();
+    
+    // Mostrar un mensaje de éxito con colores verdes
+    const msgBox = document.getElementById('message-box');
+    const msgContent = document.getElementById('message-content');
+    
+    // Cambiar a mensaje de éxito
+    document.querySelector('#message-box p').textContent = 'Malla Reiniciada';
+    msgContent.innerHTML = '<span class="text-green-700 font-bold">¡Progreso borrado!</span> Puedes empezar de nuevo.';
+    
+    // Ajustar clases para visualización de éxito
+    msgBox.classList.remove('text-red-700', 'border-l-4', 'border-red-500');
+    msgBox.classList.add('bg-green-100', 'border-green-500', 'border-l-4'); 
+    msgBox.classList.add('show');
+
+    clearTimeout(messageTimeout);
+    messageTimeout = setTimeout(() => {
+        msgBox.classList.remove('show', 'bg-green-100', 'border-green-500');
+        // Restaurar clases de error (por si acaso el próximo mensaje es un error)
+        document.querySelector('#message-box p').textContent = 'Acción Bloqueada';
+        msgBox.classList.remove('bg-green-100', 'border-green-500');
+    }, 4000);
+}
+
 
 // --- Funciones de Lógica de la Malla ---
 
@@ -329,4 +360,10 @@ function handleCourseClick(courseCode) {
 document.addEventListener('DOMContentLoaded', () => {
     loadState();
     renderCurriculum();
+
+    // Adjuntar listener al nuevo botón de Reinicio
+    const resetButton = document.getElementById('reset-button');
+    if (resetButton) {
+        resetButton.addEventListener('click', clearAllData);
+    }
 });
