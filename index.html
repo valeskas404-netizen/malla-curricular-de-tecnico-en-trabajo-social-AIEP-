@@ -14,10 +14,16 @@
 </head>
 <body class="p-4 md:p-8">
 
-    <!-- Encabezado de la Malla Curricular -->
-    <header class="mb-8 p-4 md:p-6 rounded-xl shadow-lg header-bg">
-        <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Malla Curricular - Trabajo Social</h1>
-        <p class="text-lg text-gray-700 mt-2">Haz clic para marcar como aprobado. ¡Vuelve a hacer clic para desaprobar!</p>
+    <!-- Encabezado de la Malla Curricular (Ahora con el botón de Reiniciar) -->
+    <header class="mb-8 p-4 md:p-6 rounded-xl shadow-lg header-bg flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Malla Curricular - Trabajo Social</h1>
+            <p class="text-lg text-gray-700 mt-2">Haz clic para marcar como aprobado. ¡Vuelve a hacer clic para desaprobar!</p>
+        </div>
+        <!-- Botón para forzar el reinicio de los datos -->
+        <button id="reset-button" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition duration-150 ease-in-out text-sm md:text-base whitespace-nowrap">
+            Reiniciar Malla (DEBUG)
+        </button>
     </header>
 
     <!-- Contenedor del Mensaje de Bloqueo (Modal/Toast) -->
