@@ -95,6 +95,38 @@ function getAllCourseCodesExceptPractica() {
         .map(c => c.code);
 }
 
+/**
+ * Verifica si algún curso aprobado requiere el curso dado como requisito.
+ * @param {string} prerequisiteCode - Código del curso que se quiere desaprobar.
+ * @returns {string[]} Lista de códigos de cursos aprobados que dependen del curso dado.
+ */
+function checkDownstreamDependents(prerequisiteCode) {
+    const dependents = [];
+    const allOtherCourses = getAllCourseCodesExceptPractica();
+
+    // Recorrer todos los cursos (posibles dependientes)
+    COURSE_DATA.forEach(course => {
+        const courseCode = course.code;
+
+        // 1. Si el curso dependiente está aprobado
+        if (approvedCourses[courseCode]) {
+            
+            // 2. Revisar si el curso dependiente requiere el curso dado
+            if (courseCode === 'LAB001' && course.reqs.includes('ALL')) {
+                // Si es la Práctica Laboral y está aprobada, requiere todos los demás.
+                // Si el ramo a desaprobar es cualquier ramo de la lista, es un dependiente.
+                if (allOtherCourses.includes(prerequisiteCode)) {
+                    dependents.push(courseCode);
+                }
+            } else if (course.reqs.includes(prerequisiteCode)) {
+                dependents.push(courseCode);
+            }
+        }
+    });
+    // Usar Set para eliminar duplicados y devolver la lista
+    return [...new Set(dependents)];
+}
+
 
 // --- Funciones de Interfaz de Usuario (UI) ---
 
@@ -108,7 +140,8 @@ function showMessage(type, message) {
     const msgContent = document.getElementById('message-content');
     
     if (type === 'blocked') {
-        document.querySelector('#message-box p').textContent = 'Ramo Bloqueado';
+        // En el nuevo caso, el mensaje de bloqueo puede ser por un requisito faltante O por un dependiente aprobado.
+        document.querySelector('#message-box p').textContent = 'Acción Bloqueada';
         msgContent.innerHTML = message;
     }
 
@@ -117,7 +150,7 @@ function showMessage(type, message) {
     clearTimeout(messageTimeout);
     messageTimeout = setTimeout(() => {
         msgBox.classList.remove('show');
-    }, 4000);
+    }, 6000); // Damos más tiempo para leer mensajes de bloqueo
 }
 
 // --- Renderizado Principal ---
@@ -164,19 +197,21 @@ function renderCurriculum() {
 
             card.className = cardClasses;
 
-            // 1. Verificar si está bloqueado
+            // 1. Verificar si está bloqueado por requisitos faltantes
             let missingReqs = [];
             let isBlocked = false;
 
-            if (isPracticaLaboral) {
-                missingReqs = allCourseCodes.filter(code => !approvedCourses[code]);
-                if (missingReqs.length > 0) {
-                    isBlocked = true;
-                }
-            } else if (course.reqs.length > 0) {
-                missingReqs = course.reqs.filter(reqCode => !approvedCourses[reqCode]);
-                if (missingReqs.length > 0) {
-                    isBlocked = true;
+            if (!isApproved) {
+                if (isPracticaLaboral) {
+                    missingReqs = allCourseCodes.filter(code => !approvedCourses[code]);
+                    if (missingReqs.length > 0) {
+                        isBlocked = true;
+                    }
+                } else if (course.reqs.length > 0) {
+                    missingReqs = course.reqs.filter(reqCode => !approvedCourses[reqCode]);
+                    if (missingReqs.length > 0) {
+                        isBlocked = true;
+                    }
                 }
             }
             
@@ -190,7 +225,7 @@ function renderCurriculum() {
                 card.innerHTML = `
                     <p class="font-semibold ${codeTextSize}">${course.code}</p>
                     <p class="${nameTextSize}">${course.name}</p>
-                    <span class="text-xs font-bold block mt-1">APROBADO</span>
+                    <span class="text-xs font-bold block mt-1">APROBADO (Clic para desaprobar)</span>
                 `;
             } else if (isBlocked) {
                 card.classList.add('blocked');
@@ -219,22 +254,50 @@ function renderCurriculum() {
 }
 
 /**
- * Manejador de clic para aprobar un curso o mostrar el mensaje de bloqueo.
+ * Manejador de clic para aprobar, desaprobar un curso o mostrar el mensaje de bloqueo.
  * @param {string} courseCode - Código del curso clicado.
  */
 function handleCourseClick(courseCode) {
-    if (approvedCourses[courseCode]) {
-        return; // No hacer nada si ya está aprobado
-    }
-
-    const courseElement = document.getElementById(`course-${courseCode}`);
     const course = COURSE_DATA.find(c => c.code === courseCode);
+
+    // --- LÓGICA DE DESAPROBACIÓN (UNDO) ---
+    if (approvedCourses[courseCode]) {
+        // 1. Verificar si hay ramos aprobados que dependen de este.
+        const dependentCourses = checkDownstreamDependents(courseCode);
+
+        if (dependentCourses.length > 0) {
+            // BLOQUEO: No se puede desaprobar porque rompe la cadena de requisitos
+            let reqNames = dependentCourses.map(code => 
+                `<li>${code} - ${COURSE_NAME_MAP[code]}</li>`
+            ).join('');
+            
+            const message = `No puedes desaprobar <strong>${course.name}</strong> porque los siguientes ramos ya están aprobados y dependen de él:
+                <ul class="list-disc list-inside mt-1">${reqNames}</ul>
+                <p class="mt-2 font-bold">Desaprueba primero los ramos dependientes (haciendo clic en ellos).</p>
+            `;
+            
+            showMessage('blocked', message);
+            return;
+        }
+
+        // 2. DESAPROBAR: Si no hay dependientes aprobados, desaprobar el ramo.
+        delete approvedCourses[courseCode];
+        saveState();
+        
+        // Re-renderizar para actualizar todos los estados
+        renderCurriculum();
+        return; 
+    }
+    
+    // --- LÓGICA DE APROBACIÓN (NORMAL) ---
+    
+    const courseElement = document.getElementById(`course-${courseCode}`);
 
     // Obtener los requisitos faltantes (si los hay)
     const missingReqsData = courseElement.getAttribute('data-missing-reqs');
 
     if (missingReqsData) {
-        // Ramo BLOQUEADO: Mostrar mensaje de error
+        // Ramo BLOQUEADO por prerrequisitos
         const missingReqs = JSON.parse(missingReqsData);
         
         let reqNames = missingReqs.map(code => 
@@ -258,7 +321,7 @@ function handleCourseClick(courseCode) {
     approvedCourses[courseCode] = true;
     saveState();
     
-    // Re-renderizar para actualizar todos los estados (incluyendo el desbloqueo de ramos posteriores)
+    // Re-renderizar para actualizar todos los estados 
     renderCurriculum();
 }
 
