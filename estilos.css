@@ -76,13 +76,13 @@ body {
     transform: translateY(-2px);
 }
 
-/* Estado APROBADO */
+/* Estado APROBADO: Aseguramos el cursor de puntero y que el evento se active */
 .approved {
     background-color: var(--color-approved) !important;
     color: var(--color-approved-text);
     text-decoration: none; 
     opacity: 0.9;
-    /* CORRECCIÓN CRÍTICA: Aseguramos que el puntero esté activo para la deselección */
+    cursor: pointer; /* Fuerza el cursor de mano */
     pointer-events: auto; 
     transform: none;
 }
