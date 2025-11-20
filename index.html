@@ -1,1 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Malla Curricular - Trabajo Social</title>
+    
+    <!-- Carga de Tailwind CSS para el diseño responsivo y base -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Vinculación del archivo de estilos personalizado -->
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<body class="p-4 md:p-8">
 
+    <!-- Encabezado de la Malla Curricular -->
+    <header class="mb-8 p-4 md:p-6 rounded-xl shadow-lg header-bg">
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Malla Curricular - Trabajo Social</h1>
+        <p class="text-lg text-gray-700 mt-2">Haz clic en un ramo para marcarlo como aprobado. ¡Los requisitos deben cumplirse!</p>
+    </header>
+
+    <!-- Contenedor del Mensaje de Bloqueo (Modal/Toast) -->
+    <div id="message-box" class="fixed top-4 right-4 w-full max-w-sm p-4 rounded-lg shadow-xl border-l-4">
+        <p class="font-bold text-red-700">Ramo Bloqueado</p>
+        <div id="message-content" class="text-sm text-red-600 mt-1"></div>
+    </div>
+
+    <!-- Contenedor Principal de la Malla (Responsive Grid) -->
+    <main id="curriculum-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4"></main>
+
+    <!-- Vinculación del archivo JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
