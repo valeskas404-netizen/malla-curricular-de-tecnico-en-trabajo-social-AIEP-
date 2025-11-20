@@ -225,7 +225,7 @@ function renderCurriculum() {
                 card.innerHTML = `
                     <p class="font-semibold ${codeTextSize}">${course.code}</p>
                     <p class="${nameTextSize}">${course.name}</p>
-                    <span class="text-xs font-bold block mt-1">APROBADO (Clic para desaprobar)</span>
+                    <span class="text-xs font-bold block mt-1">APROBADO (CLIC PARA DESAPROBAR)</span>
                 `;
             } else if (isBlocked) {
                 card.classList.add('blocked');
