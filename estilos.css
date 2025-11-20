@@ -1,1 +1,120 @@
+/* Definición de la paleta de colores pastel (Fairycore suave en tonos rosas y morados) */
+:root {
+    --color-pastel-bg: #F7F2F6; /* Fondo principal muy claro */
+    --color-pastel-header: #DBCDF0; /* Lavanda suave (Header) */
+    --color-text-main: #5A486F; /* Púrpura oscuro para legibilidad */
+    --color-line: #E0BBE4; /* Lila/Orquídea claro para las líneas */
+    --color-card-bg: #FFFFFF; /* Fondo de la tarjeta */
+    --color-approved: #F1D3D3; /* Rosa pálido suave (Aprobado) */
+    --color-approved-text: #6B4E5E; 
+    --color-blocked-bg: #F8BBD0; /* Rosa fuerte para destacar */
+    --color-blocked-text: #C2185B;
+}
 
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--color-pastel-bg);
+    color: var(--color-text-main);
+}
+
+/* Estilo para el encabezado */
+.header-bg {
+    background-color: var(--color-pastel-header);
+    color: var(--color-text-main);
+}
+
+/* --- Estilo de Malla Card-based (Compacto) --- */
+
+/* Contenedor de cada columna de semestre */
+.semester-column {
+    display: flex;
+    flex-direction: column;
+    /* Espacio entre los ramos dentro de una columna */
+    gap: 0.75rem; /* Espacio pequeño para mantener la compacidad */
+    position: relative;
+    
+    /* Línea divisoria vertical entre semestres */
+    border-right: 1px solid var(--color-line); 
+    padding-right: 0.75rem; /* Espacio antes del borde */
+}
+
+/* Eliminar el borde derecho en la última columna de la cuadrícula */
+#curriculum-grid > .semester-column:last-child {
+    border-right: none;
+    padding-right: 0;
+}
+
+
+/* Título del Semestre: Sutil y centrado */
+.semester-title {
+    text-align: center;
+    padding: 0.5rem;
+    font-size: 1rem; 
+    font-weight: 700;
+    color: var(--color-text-main);
+    margin-bottom: 0.5rem;
+    background-color: var(--color-card-bg); 
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Estilo para las tarjetas de cursos (ramos) */
+.course-card {
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+    /* Fondo y borde para el recuadro */
+    background-color: var(--color-card-bg); 
+    border: 1px solid rgba(219, 205, 240, 0.5); /* Borde suave */
+    border-radius: 0.5rem;
+    padding: 0.5rem; /* Padding pequeño para compacidad */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Hover: Mantiene el efecto visual */
+.course-card:not(.approved):not(.blocked):hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+/* Estado APROBADO */
+.approved {
+    background-color: var(--color-approved) !important;
+    color: var(--color-approved-text);
+    text-decoration: none; 
+    opacity: 0.9;
+    pointer-events: none;
+    transform: none;
+}
+
+/* Estado BLOQUEADO */
+.blocked {
+    background-color: var(--color-blocked-bg) !important; 
+    color: var(--color-blocked-text);
+    opacity: 0.9;
+    /* Sombra para destacar visualmente el bloqueo */
+    box-shadow: 0 0 0 2px var(--color-blocked-text); 
+}
+
+/* Estilos específicos para la Práctica Laboral */
+.practica-card {
+    background-color: #A36F8B;
+    color: white;
+    font-weight: bold;
+}
+
+/* Estilos para el mensaje de bloqueo */
+#message-box {
+    z-index: 50;
+    transition: opacity 0.3s, transform 0.3s;
+    transform: translateY(20px);
+    opacity: 0;
+    pointer-events: none;
+    background-color: #fff0f5;
+    border-color: #ffc0cb;
+}
+
+#message-box.show {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+}
